@@ -5,7 +5,7 @@ This is the README.md file for our React Native project with TypeScript. In this
 
 Before getting started, make sure you have the following prerequisites installed on your computer:
 
-- [Node.js](https://nodejs.org) (recommended version)
+- [Node.js](https://nodejs.org)
 - [npm](https://www.npmjs.com) or [Yarn](https://yarnpkg.com) package manager
 
 To install the required dependencies, follow these steps:
