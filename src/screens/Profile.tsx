@@ -9,47 +9,98 @@ import {
   FlatList,
 } from 'react-native';
 import TabComponent from '../components/ Tab';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 interface Platform {
   id: string;
-  name: string;
+  title: string;
   profilePic: string;
   details: string;
+  isSelected: boolean
+  posts: string;
+  followers: string;
+  following: string;
+  name: string;
+  prof: string;
+  address: string;
+  subtitle: string;
+  link: string;
+  icon: string;
 }
 
 const platforms: Platform[] = [
   {
     id: '1',
-    name: 'Instagram',
-    profilePic: '',
+    title: 'Instagram',
+    profilePic: 'https://www.ikea.com/gb/en/images/products/kopparfall-picture-moonscape__0997459_pe822680_s5.jpg?f=xs',
     details: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    isSelected: true,
+    posts: "447",
+    followers: "3.6",
+    following: "1,351",
+    name: 'Noah Beck',
+    prof: 'Athlete',
+    address: 'noah@talentxent.com',
+    subtitle: 'do what makes you happy',
+    link: '',
+    icon: 'instagram'
   },
   {
     id: '2',
-    name: 'TikTok',
-    profilePic: '',
+    title: 'TikTok',
+    profilePic: 'https://images.unsplash.com/photo-1526547541286-73a7aaa08f2a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D&w=1000&q=80',
     details:
       'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    isSelected: false,
+    posts: "237",
+    followers: "2.1",
+    following: "421",
+    name: 'Beck',
+    prof: 'Athlete',
+    address: 'noah@talentxent.com',
+    subtitle: 'do what makes you happy',
+    link: '',
+    icon: 'tiktok'
   },
   {
     id: '3',
-    name: 'Twitter',
-    profilePic: '',
+    title: 'Twitter',
+    profilePic: 'https://media.sproutsocial.com/uploads/2022/06/profile-picture.jpeg',
     details:
       'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    isSelected: false,
+    posts: "47",
+    followers: "1.2",
+    following: "51",
+    name: 'Noah',
+    prof: 'Athlete',
+    address: 'noah@talentxent.com',
+    subtitle: 'do what makes you happy',
+    link: '',
+    icon: 'twitter',
   },
-  // {
-  //   id: '4',
-  //   name: 'Facebook',
-  //   profilePic: '',
-  //   details:
-  //     'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  // },
+  {
+    id: '4',
+    title: 'Facebook',
+    profilePic: 'https://discovery.sndimg.com/content/dam/images/discovery/editorial/podcasts/Curiosity/2020/3/GettyImages-1134062152.jpg.rend.hgtvcom.406.406.suffix/1583191585259.jpeg',
+    details:
+      'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    isSelected: false,
+    posts: "33",
+    followers: "1.6",
+    following: "2,351",
+    name: 'Beck',
+    prof: 'Athlete',
+    address: 'noah@talentxent.com',
+    subtitle: 'do what makes you happy',
+    link: '',
+    icon: 'facebook-square'
+  },
 ];
 
 export const ProfileScreen: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(
-    null,
+    platforms[0],
   );
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -60,10 +111,10 @@ export const ProfileScreen: React.FC = () => {
 
   const renderPlatformItem = ({item}: {item: Platform}) => (
     <TouchableOpacity
-      style={styles.platformButton}
+      style={styles.platformItem}
       onPress={() => handlePlatformSelect(item)}>
       <Image source={{uri: item.profilePic}} style={styles.profilePic} />
-      <Text style={styles.platformName}>{item.name}</Text>
+      <Text style={styles.platformName}>{item.title}</Text>
     </TouchableOpacity>
   );
 
@@ -71,37 +122,60 @@ export const ProfileScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.stackContainer}>
-          {platforms.map(platform => (
-            <TouchableOpacity key={platform.id} style={styles.platformButton}>
+          {platforms.slice(0, 2).map((platform) => (
+            <TouchableOpacity
+              key={platform.id}
+              style={styles.platformButton}
+              disabled={!platform.isSelected}
+              onPress={() => {
+                setModalVisible(true);
+              }}
+            >
               <Image
-                source={{uri: platform.profilePic}}
+                source={{ uri: platform.profilePic }}
                 style={styles.profilePic}
               />
             </TouchableOpacity>
           ))}
+          {selectedPlatform && (
+            <TouchableOpacity
+              style={styles.platformButton}
+              onPress={() => {
+                setModalVisible(true);
+              }}
+            >
+              <Image
+                source={{ uri: selectedPlatform.profilePic }}
+                style={styles.profilePic}
+              />
+              {/* <View style={styles.platformIcon}>
+                <Icon name={selectedPlatform.icon} size={23} color="#000" />
+              </View> */}
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.info}>
           <TouchableOpacity style={styles.infoItem}>
-            <Text style={styles.count}>447</Text>
+            <Text style={styles.count}>{selectedPlatform?.posts}</Text>
             <Text style={styles.countName}>Posts</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.infoItem}>
-            <Text style={styles.count}>3.6M</Text>
+            <Text style={styles.count}>{selectedPlatform?.followers}M</Text>
             <Text style={styles.countName}>Followers</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.infoItem}>
-            <Text style={styles.count}>1,351</Text>
+            <Text style={styles.count}>{selectedPlatform?.following}</Text>
             <Text style={styles.countName}>Following</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.userDetails}>
-        <Text style={styles.name}>Noah Beck</Text>
-        <Text style={styles.profession}>Athlete</Text>
-        <Text style={styles.sub}>noah@talentxent.com</Text>
-        <Text style={styles.sub}>do what makes you happy</Text>
-        <Text style={styles.link}>link</Text>
+        <Text style={styles.name}>{selectedPlatform?.name}</Text>
+        <Text style={styles.profession}>{selectedPlatform?.prof ? selectedPlatform?.prof : ''}</Text>
+        <Text style={styles.sub}>{selectedPlatform?.address ? selectedPlatform?.address : ''}</Text>
+        <Text style={styles.sub}>{selectedPlatform?.subtitle ? selectedPlatform?.subtitle : ''}</Text>
+        <Text style={styles.link}>{selectedPlatform?.link ? selectedPlatform.link : 'link'}</Text>
       </View>
 
       <View style={styles.panel}>
@@ -120,10 +194,20 @@ export const ProfileScreen: React.FC = () => {
       </View>
 
       <TabComponent />
-      {/*
+      
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalContainer}>
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
           <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Icon name="close" size={20} color="#000" />
+            </TouchableOpacity>
             <FlatList
               data={platforms}
               renderItem={renderPlatformItem}
@@ -131,15 +215,11 @@ export const ProfileScreen: React.FC = () => {
               horizontal
             />
           </View>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal> */}
+          
+        </TouchableOpacity>
+      </Modal>
 
-      {selectedPlatform && (
+      {/* {selectedPlatform && (
         <View style={styles.detailsContainer}>
           <Image
             source={{uri: selectedPlatform.profilePic}}
@@ -152,7 +232,7 @@ export const ProfileScreen: React.FC = () => {
             {selectedPlatform.details}
           </Text>
         </View>
-      )}
+      )} */}
     </View>
   );
 };
@@ -188,6 +268,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontWeight: 'bold',
     color: '#000',
+  },
+  platformIcon: {
+    position: 'absolute',
+    top: 0,
+    right: 0
   },
   info: {
     flexDirection: 'row',
@@ -261,20 +346,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    height: 160,
-    flexDirection: 'row',
+    height: 170,
+    flexDirection: 'column',
     backgroundColor: '#fff',
     margin: 16,
     borderRadius: 8,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10
   },
   closeButton: {
-    alignSelf: 'center',
-    marginTop: 16,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    marginBottom: 5
   },
   closeButtonText: {
     color: 'blue',
     fontSize: 18,
+  },
+  platformItem: {
+    flexDirection: 'column',
+    alignItems: 'center'
   },
   detailsContainer: {
     alignItems: 'center',
