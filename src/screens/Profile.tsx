@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Image,
@@ -7,11 +7,11 @@ import {
   StyleSheet,
   Modal,
   FlatList,
+  Animated,
 } from 'react-native';
 import TabComponent from '../components/ Tab';
-import Icon from 'react-native-vector-icons/AntDesign';
 
-interface Platform {
+export interface Platform {
   id: string;
   title: string;
   profilePic: string;
@@ -102,21 +102,67 @@ export const ProfileScreen: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(
     platforms[0],
   );
+  const [delayedSelectedPlatform, setDelayedSelectedPlatform] = useState<Platform | null>(platforms[0]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState(1);
+  const [animation] = useState(new Animated.Value(0));
 
   const handlePlatformSelect = (platform: Platform) => {
     setSelectedPlatform(platform);
-    setModalVisible(false);
+
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start(() => {
+      animation.setValue(0);
+      setModalContent(2);
+  
+      setTimeout(() => {
+        setModalVisible(false);
+        setDelayedSelectedPlatform(platform);
+        setModalContent(1);
+      }, 1200);
+    });
   };
 
-  const renderPlatformItem = ({item}: {item: Platform}) => (
-    <TouchableOpacity
-      style={styles.platformItem}
-      onPress={() => handlePlatformSelect(item)}>
-      <Image source={{uri: item.profilePic}} style={styles.profilePic} />
-      <Text style={styles.platformName}>{item.title}</Text>
-    </TouchableOpacity>
-  );
+  const renderPlatformItem = ({ item }: { item: Platform }) => {
+    const animatedStyle = {
+      transform: [
+        {
+          translateX: animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0],
+          }),
+        },
+        {
+          scale: animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 0],
+          }),
+        },
+      ],
+      opacity: animation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0],
+      }),
+    };
+  
+    return (
+      <TouchableOpacity
+        style={styles.platformItem}
+        onPress={() => handlePlatformSelect(item)}
+      >
+        <Animated.Image
+          source={{ uri: item.profilePic }}
+          style={[styles.profilePic, animatedStyle]}
+        />
+        <Animated.Text style={[styles.platformName, animatedStyle]}>
+          {item.title}
+        </Animated.Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -145,37 +191,34 @@ export const ProfileScreen: React.FC = () => {
               }}
             >
               <Image
-                source={{ uri: selectedPlatform.profilePic }}
+                source={{ uri: delayedSelectedPlatform?.profilePic }}
                 style={styles.profilePic}
               />
-              {/* <View style={styles.platformIcon}>
-                <Icon name={selectedPlatform.icon} size={23} color="#000" />
-              </View> */}
             </TouchableOpacity>
           )}
         </View>
         <View style={styles.info}>
           <TouchableOpacity style={styles.infoItem}>
-            <Text style={styles.count}>{selectedPlatform?.posts}</Text>
+            <Text style={styles.count}>{delayedSelectedPlatform?.posts}</Text>
             <Text style={styles.countName}>Posts</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.infoItem}>
-            <Text style={styles.count}>{selectedPlatform?.followers}M</Text>
+            <Text style={styles.count}>{delayedSelectedPlatform?.followers}M</Text>
             <Text style={styles.countName}>Followers</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.infoItem}>
-            <Text style={styles.count}>{selectedPlatform?.following}</Text>
+            <Text style={styles.count}>{delayedSelectedPlatform?.following}</Text>
             <Text style={styles.countName}>Following</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.userDetails}>
-        <Text style={styles.name}>{selectedPlatform?.name}</Text>
-        <Text style={styles.profession}>{selectedPlatform?.prof ? selectedPlatform?.prof : ''}</Text>
-        <Text style={styles.sub}>{selectedPlatform?.address ? selectedPlatform?.address : ''}</Text>
-        <Text style={styles.sub}>{selectedPlatform?.subtitle ? selectedPlatform?.subtitle : ''}</Text>
-        <Text style={styles.link}>{selectedPlatform?.link ? selectedPlatform.link : 'link'}</Text>
+        <Text style={styles.name}>{delayedSelectedPlatform?.name}</Text>
+        <Text style={styles.profession}>{delayedSelectedPlatform?.prof ? delayedSelectedPlatform?.prof : ''}</Text>
+        <Text style={styles.sub}>{delayedSelectedPlatform?.address ? delayedSelectedPlatform?.address : ''}</Text>
+        <Text style={styles.sub}>{delayedSelectedPlatform?.subtitle ? delayedSelectedPlatform?.subtitle : ''}</Text>
+        <Text style={styles.link}>{delayedSelectedPlatform?.link ? delayedSelectedPlatform.link : 'link'}</Text>
       </View>
 
       <View style={styles.panel}>
@@ -193,46 +236,34 @@ export const ProfileScreen: React.FC = () => {
         </View>
       </View>
 
-      <TabComponent />
+      <TabComponent selectedPlatform={delayedSelectedPlatform!} />
       
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+      <Modal visible={modalVisible} animationType="fade" transparent={true}>
         <TouchableOpacity
           style={styles.modalContainer}
           activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Icon name="close" size={20} color="#000" />
-            </TouchableOpacity>
-            <FlatList
-              data={platforms}
-              renderItem={renderPlatformItem}
-              keyExtractor={item => item.id}
-              horizontal
-            />
+            {modalContent === 1 ?
+              <FlatList
+                data={platforms}
+                renderItem={renderPlatformItem}
+                keyExtractor={item => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+              />  :
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <Image
+                  source={{ uri: selectedPlatform?.profilePic }}
+                  style={[styles.profilePic, {width: 150, height: 150, borderRadius: 75}]}
+                />
+                <Text style={styles.platformName}>{selectedPlatform?.title}</Text>
+              </View>
+            }
           </View>
-          
         </TouchableOpacity>
       </Modal>
-
-      {/* {selectedPlatform && (
-        <View style={styles.detailsContainer}>
-          <Image
-            source={{uri: selectedPlatform.profilePic}}
-            style={styles.selectedProfilePic}
-          />
-          <Text style={styles.selectedPlatformName}>
-            {selectedPlatform.name}
-          </Text>
-          <Text style={styles.selectedPlatformDetails}>
-            {selectedPlatform.details}
-          </Text>
-        </View>
-      )} */}
     </View>
   );
 };
@@ -240,7 +271,6 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -267,7 +297,7 @@ const styles = StyleSheet.create({
   platformName: {
     marginTop: 8,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#fff',
   },
   platformIcon: {
     position: 'absolute',
@@ -343,29 +373,20 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalContent: {
     height: 170,
     flexDirection: 'column',
-    backgroundColor: '#fff',
-    margin: 16,
+    alignItems: 'center',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 10
   },
-  closeButton: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-    marginBottom: 5
-  },
-  closeButtonText: {
-    color: 'blue',
-    fontSize: 18,
-  },
   platformItem: {
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginLeft: 5
   },
   detailsContainer: {
     alignItems: 'center',

@@ -1,37 +1,16 @@
 import React, {useState} from 'react';
-import {View, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
+import {View, TouchableOpacity, StyleSheet, ScrollView, Text} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
+import { Platform } from '../screens/Profile';
+import { TabContent } from './TabContent';
+
 
 interface Tab {
   id: number;
   icon: string;
 }
 
-const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
-
-const TabContent: React.FC = () => {
-  return (
-    <ScrollView contentContainerStyle={styles.tabContentContainer}>
-      {Array(12)
-        .fill(null)
-        .map((_, index) => (
-          <View
-            key={index}
-            style={[styles.randomBox, {backgroundColor: getRandomColor()}]}
-          />
-        ))}
-    </ScrollView>
-  );
-};
-
-const TabComponent: React.FC = () => {
+const TabComponent: React.FC<{selectedPlatform: Platform}> = ({selectedPlatform}) => {
   const [activeTab, setActiveTab] = useState(1);
 
   const tabs: Tab[] = [
@@ -43,6 +22,7 @@ const TabComponent: React.FC = () => {
   const handleTabPress = (tabId: number) => {
     setActiveTab(tabId);
   };
+
 
   return (
     <View style={styles.container}>
@@ -61,9 +41,9 @@ const TabComponent: React.FC = () => {
         ))}
       </View>
 
-      {activeTab === 1 && <TabContent />}
-      {activeTab === 2 && <TabContent />}
-      {activeTab === 3 && <TabContent />}
+      {activeTab === 1 && <TabContent selectedPlatform={selectedPlatform} />}
+      {activeTab === 2 && <TabContent selectedPlatform={selectedPlatform} />}
+      {activeTab === 3 && <TabContent selectedPlatform={selectedPlatform} />}
     </View>
   );
 };
@@ -82,18 +62,6 @@ const styles = StyleSheet.create({
   },
   activeTabButtonText: {
     color: '#000',
-  },
-  tabContentContainer: {
-    flexGrow: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  randomBox: {
-    width: 120,
-    height: 120,
-    margin: 1,
   },
 });
 
